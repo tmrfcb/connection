@@ -1,0 +1,289 @@
+// User-related entities
+entity SocialProfile {
+    // Social profile information
+    provider String,          // Social media provider (e.g., Facebook, Twitter)
+    providerId String,        // Unique identifier from the social media provider
+    displayName String,       // Display name on the social media platform
+    profileUrl String,        // URL to the user's social media profile
+    accessToken String,       // Token for accessing the user's social media data
+    refreshToken String       // Token used to obtain a new access token
+}
+
+entity UserProfile {
+    // User's personal information
+    gender Gender,            // Gender of the user (Male, Female)
+    firstName String,         // First name of the user
+    lastName String,          // Last name of the user
+    email String,             // User's email address
+    phoneNumber String,       // User's phone number
+    birthDate Instant,        // User's date of birth
+    activated Boolean,        // Indicates whether the user account is activated
+    password String,          // User's password (hashed or encrypted)
+    isPaid Boolean,           // Indicates if the user is on a paid plan
+    currentPlanId String,     // Identifier for the user's current subscription plan
+    religion Religion         // User's religious affiliation
+}
+
+entity UserPreferences {
+    // User's preferences for matching
+    preferredMinAge Integer,  // Preferred minimum age of potential matches
+    preferredMaxAge Integer,  // Preferred maximum age of potential matches
+    interests UserInterests   // User's specific interests or hobbies
+}
+
+entity UserInterests {
+    // User's specific interests or hobbies
+    hobbie String
+}
+
+entity UserVerification {
+    // User's verification status and date
+    verified Boolean,             // Indicates whether the user is verified
+    verificationDate ZonedDateTime // Date and time of user verification
+}
+
+entity UserNotification {
+    // User's notifications
+    notificationContent TextBlob, // Content of the notification
+    notificationDate ZonedDateTime // Date and time of the notification
+}
+
+entity UserBlock {
+    // User's blocked contacts and block date
+    blockedUserId String,          // ID of the user being blocked
+    blockDate ZonedDateTime        // Date and time when the block occurred
+}
+
+entity UserReview {
+    // User's reviews given to others
+    reviewerId String,            // ID of the user giving the review
+    reviewContent TextBlob,       // Content of the review
+    reviewDate ZonedDateTime       // Date and time of the review
+}
+
+entity UserActivity {
+    // User's login and last online dates
+    loginDate ZonedDateTime,      // Date and time of the user's last login
+    lastOnlineDate ZonedDateTime   // Date and time of the user's last online activity
+}
+
+// Miscellaneous entities
+entity Religion {
+    // Religious information
+    religionName String,          // Name of the religion
+    religiousIntensity Integer    // Intensity of religious beliefs (changed attribute name)
+    // Add more attributes as needed
+}
+
+entity Relationship {
+    // User relationships
+    relatedUserId String,         // ID of the related user in the relationship
+    relationshipType RelationshipType // Type of relationship (LIKE, DISLIKE, SUPERLIKE)
+}
+
+entity Proposal {
+    // Relationship proposals and dates
+    proposalDate ZonedDateTime    // Date and time of the proposal
+}
+
+entity Breakup {
+    // Relationship breakups and dates
+    breakupDate ZonedDateTime     // Date and time of the breakup
+}
+
+entity Message {
+    // User messages
+    senderId String,              // ID of the message sender
+    receiverId String,            // ID of the message receiver
+    messageContent String,        // Content of the message
+    messageTitle TextBlob,        // Title or subject of the message
+    messageDate ZonedDateTime      // Date and time of the message
+}
+
+entity ReportUser {
+    // Reports on user behavior
+    reportId String,              // ID of the report
+    userId String,                // ID of the reported user
+    cause TextBlob                // Description of the reported behavior
+}
+
+entity Location {
+    latitude Double,
+    longitude Double, 
+    postalCode String,
+    country Country,
+    state State,
+    city City
+}
+
+entity Country {
+    name String
+}
+
+entity State {
+    name String,
+    country Country
+}
+
+entity City {
+    name String,
+    state State
+}
+
+// Payment-related entities
+entity SubscriptionPlan {
+    // Subscription plans available to users
+    planId String,                // ID of the subscription plan
+    planName String,              // Name of the subscription plan
+    price Decimal,                // Price of the subscription plan
+    durationMonths Integer,       // Duration of the subscription plan in months
+    features TextBlob             // Features included in the subscription plan
+}
+
+entity Payment {
+    // User payments and transaction details
+    paymentId String,             // ID of the payment
+    paymentDate ZonedDateTime,    // Date and time of the payment
+    amount Decimal,               // Amount of the payment
+    paymentMethod String,         // Payment method used
+    transactionId String,         // ID of the payment transaction
+    status PaymentStatus           // Status of the payment (PENDING, SUCCESS, FAILURE, REFUND)
+}
+
+// Media entity
+entity Media {
+    // Media files associated with users
+    mediaId String,               // ID of the media
+    url String,                   // URL of the media file
+    type MediaType                // Type of media (IMAGE, VIDEO, AUDIO)
+}
+
+// Relationships
+
+// One-to-One relationship: Each UserProfile has one associated SocialProfile
+relationship OneToOne {
+    UserProfile{socialProfile} to SocialProfile{userProfile}
+}
+
+// One-to-Many relationship: Each UserProfile can be associated with multiple Relationships
+relationship OneToMany {
+    UserProfile{relationship} to Relationship{userProfile}
+}
+
+// Many-to-One relationship: Each Relationship is associated with one Proposal
+relationship ManyToOne {
+    Relationship{proposal} to Proposal{relationship}
+}
+
+// Many-to-One relationship: Each Relationship is associated with one Breakup
+relationship ManyToOne {
+    Relationship{breakup} to Breakup{relationship}
+}
+
+// Many-to-One relationship: Each Proposal is associated with one Message
+relationship ManyToOne {
+    Proposal{message} to Message
+}
+
+ 
+ 
+
+relationship OneToOne {
+    UserProfile{location} to Location{userProfile}
+}
+ 
+relationship ManyToOne {
+    State{country} to Country{states}
+}
+
+relationship ManyToOne {
+    City{state} to State{cities}
+}
+
+relationship ManyToOne {
+    Location{country} to Country
+}
+
+relationship ManyToOne {
+    Location{state} to State
+}
+
+relationship ManyToOne {
+    Location{city} to City
+}
+
+
+// One-to-One relationship: Each UserProfile is associated with one SubscriptionPlan
+relationship OneToOne {
+    UserProfile{subscriptionPlan} to SubscriptionPlan{currentUserProfile}
+}
+
+// One-to-Many relationship: Each UserProfile can be associated with multiple Payments
+relationship OneToMany {
+    UserProfile{payment} to Payment{userProfile}
+}
+
+// One-to-Many relationship: Each UserProfile can be associated with multiple Media
+relationship OneToMany {
+    UserProfile{media} to Media{userProfile}
+}
+
+// One-to-One relationship: Each UserProfile is associated with one UserVerification
+relationship OneToOne {
+    UserProfile{verification} to UserVerification{userProfile}
+}
+
+// One-to-Many relationship: Each UserProfile can be associated with multiple Notifications
+relationship OneToMany {
+    UserProfile{notifications} to UserNotification{userProfile}
+}
+
+// One-to-Many relationship: Each UserProfile can be associated with multiple UserBlocks
+relationship OneToMany {
+    UserProfile{blocks} to UserBlock{userProfile}
+}
+
+// One-to-Many relationship: Each UserProfile can be associated with multiple UserReviews
+relationship OneToMany {
+    UserProfile{reviews} to UserReview{userProfile}
+}
+
+// One-to-One relationship: Each UserProfile is associated with one UserActivity
+relationship OneToOne {
+    UserProfile{activity} to UserActivity{userProfile}
+}
+
+// One-to-One relationship: Each UserProfile is associated with one UserPreferences
+relationship OneToOne {
+    UserProfile{preferences} to UserPreferences{userProfile}
+}
+
+// One-to-One relationship: Each UserProfile is associated with one UserInterests
+relationship OneToOne {
+    UserProfile{interests} to UserInterests{userProfile}
+}
+relationship ManyToOne {
+    UserProfile{reports} to ReportUser{userProfile}
+}
+// One-to-One relationship: Each UserProfile is associated with one Religion
+relationship OneToOne {
+    UserProfile{religion} to Religion{userProfile}
+}
+
+enum RelationshipType {
+    LIKE, DISLIKE, SUPERLIKE
+}
+
+enum PaymentStatus {
+    PENDING, SUCCESS, FAILURE, REFUND
+}
+
+enum MediaType {
+    IMAGE, VIDEO, AUDIO
+}
+enum Gender {
+    MALE, FEMALE
+}
+enum Religion {
+    SUNNI, SHIITE, OTHER  
+}
